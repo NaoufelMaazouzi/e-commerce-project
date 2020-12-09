@@ -7,10 +7,7 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
+    useParams
 } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -38,10 +35,12 @@ const useStyles = makeStyles((theme) => ({
 
 function ProductsComponent() {
     const [products, setProducts] = useState([])
+    let params = useParams();
 
     useEffect(() => {
-        axios.get('http://localhost:5000/products/')
+        axios.get(`http://localhost:5000/products/${params.id}`)
             .then(response => {
+                console.log(response.data);
                 setProducts(response.data);
             })
             .catch((err) => {
@@ -51,11 +50,9 @@ function ProductsComponent() {
     const classes = useStyles();
 
     return (
-        <Router>
-            <div className={classes.root}>
-                Hello
-            </div >
-        </Router>
+        <div className={classes.root}>
+            Hello
+        </div >
     );
 }
 

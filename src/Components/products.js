@@ -6,6 +6,7 @@ import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import {
     BrowserRouter as Router,
     Switch,
@@ -51,18 +52,18 @@ function ProductsComponent() {
     const classes = useStyles();
 
     return (
-        <Router>
-            <div className={classes.root}>
+        <div className={classes.root}>
+            {products.length ?
                 <Grid container >
                     {products.map(product =>
-                        <Link to={`/productsDetails/${product.id}`} >
-                            <Card className={classes.root} item xs={3}>
-                                <CardActionArea className={classes.root} item xs={3}>
+                        <Link to={`/${product.id}`} >
+                            <Card className={classes.root} item="true" xs={3}>
+                                <CardActionArea className={classes.root} item="true" xs={3}>
                                     <CardMedia
                                         className={classes.img}
                                         component="img"
                                         alt="Contemplative Reptile"
-                                        height="940"
+                                        height="140"
                                         image={product.imgUrl}
                                         title="Contemplative Reptile"
                                     />
@@ -75,8 +76,9 @@ function ProductsComponent() {
                         </Link>
                     )}
                 </Grid>
-            </div >
-        </Router>
+                : <CircularProgress />
+            }
+        </div >
     );
 }
 

@@ -22,16 +22,14 @@ function App() {
       })
   }, [])
 
-  return !console.log(products) && (
+  return (
     <Router>
       <div className="App">
         <SearchBar />
         <Switch>
-          <Route path="/productsDetails/:id">
-            <ProductDetails />
+          <Route exact path="/" component={ProductsComponent}>
           </Route>
-          <Route path="/products">
-            <ProductsComponent />
+          <Route path="/:id" component={ProductDetails}>
           </Route>
         </Switch>
       </div>
