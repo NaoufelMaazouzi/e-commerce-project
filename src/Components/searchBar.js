@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { auth } from '../firebase';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
@@ -14,6 +16,8 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import { useHistory } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -52,6 +56,13 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    deconnexion: {
+        marginLeft: '0.1%'
+    },
+    linkRouter: {
+        color: '#FFF',
+        textDecoration: 'none'
+    },
     inputRoot: {
         color: 'inherit',
     },
@@ -83,6 +94,16 @@ function SearchBar() {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+    const [userInfos, setUserInfos] = useState();
+    let history = useHistory();
+
+    useEffect(() => {
+        auth.onAuthStateChanged(function (user) {
+            if (user) {
+                setUserInfos(user)
+            }
+        });
+    }, []);
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -103,6 +124,18 @@ function SearchBar() {
     const handleMobileMenuOpen = (event) => {
         setMobileMoreAnchorEl(event.currentTarget);
     };
+
+    const handleSignOut = () => {
+        auth.signOut()
+            .then(() => {
+                console.log('user signed out')
+                setUserInfos();
+                history.push("/");
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
 
     const menuId = 'primary-search-account-menu';
     const renderMenu = (
@@ -173,9 +206,11 @@ function SearchBar() {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography className={classes.title} variant="h6" noWrap>
-                        E-Commerce
-          </Typography>
+                    <Link to="/" className={classes.linkRouter}>
+                        <Typography className={classes.title} variant="h6" noWrap>
+                            E-Commerce
+                    </Typography>
+                    </Link>
                     <div className={classes.search}>
                         <div className={classes.searchIcon}>
                             <SearchIcon />
@@ -201,17 +236,29 @@ function SearchBar() {
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>
-                        <IconButton
-                            edge="end"
-                            aria-label="account of current user"
-                            aria-controls={menuId}
-                            aria-haspopup="true"
-                            onClick={handleProfileMenuOpen}
-                            color="inherit"
-                        >
-                            <AccountCircle />
-                        </IconButton>
+                        {userInfos &&
+                            <IconButton
+                                edge="end"
+                                aria-label="account of current user"
+                                aria-controls={menuId}
+                                aria-haspopup="true"
+                                onClick={handleProfileMenuOpen}
+                                color="inherit"
+                            >
+                                <AccountCircle />
+                            </IconButton>
+                        }
                     </div>
+                    {userInfos ?
+                        <Button onClick={handleSignOut} variant="contained" color="primary" disableElevation className={classes.deconnexion}>
+                            Deconnexion
+                        </Button> :
+                        <Link to="/signUp" className={classes.linkRouter}>
+                            <Button variant="contained" color="primary" disableElevation>
+                                Connexion
+                    </Button>
+                        </Link>
+                    }
                     <div className={classes.sectionMobile}>
                         <IconButton
                             aria-label="show more"

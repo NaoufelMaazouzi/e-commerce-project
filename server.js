@@ -3,7 +3,6 @@ const http = require('http');
 const cors = require('cors');
 
 var admin = require('firebase-admin');
-// eslint-disable-next-line no-useless-escape
 var serviceAccount = require("./secret-key.json");
 
 admin.initializeApp({
@@ -58,10 +57,14 @@ app.use(cors());
 app.use(express.json());
 
 // ROUTES
-const productsRouter = require('./routes/products');
-const route = require('./routes/route');
+const productsRouter = require('./ApiRoutes/products');
+const signUpRouter = require('./ApiRoutes/signUp');
+const signInRouter = require('./ApiRoutes/signIn');
+const route = require('./ApiRoutes/route');
 
 app.use('/products', productsRouter);
+app.use('/signUp', signUpRouter);
+app.use('/signIn', signInRouter);
 app.use('/', route);
 
 // FOR PRODUCTION

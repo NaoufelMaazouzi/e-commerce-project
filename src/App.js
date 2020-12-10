@@ -1,36 +1,27 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import SearchBar from './Components/searchBar';
 import ProductsComponent from './Components/products';
 import ProductDetails from './Components/productDetails';
+import SearchBar from './Components/searchBar';
+import SignUp from './Components/signUp';
+import PublicRoute from './ReactRouterRoutes/publicRoute';
+import Dashboard from './Components/dashboard';
+
+
 import {
   BrowserRouter as Router,
   Switch,
-  Route,
 } from "react-router-dom";
 
 function App() {
-  const [products, setProducts] = useState([])
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/products/')
-      .then(response => {
-        setProducts(response.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-  }, [])
 
   return (
     <Router>
       <div className="App">
         <SearchBar />
         <Switch>
-          <Route exact path="/" component={ProductsComponent}>
-          </Route>
-          <Route path="/:id" component={ProductDetails}>
-          </Route>
+          <PublicRoute exact path="/" component={ProductsComponent} />
+          <PublicRoute path="/product/:id" component={ProductDetails} />
+          <PublicRoute path="/signUp" component={SignUp} />
+          <PublicRoute path="/dashboard" component={Dashboard} />
         </Switch>
       </div>
     </Router >
