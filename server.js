@@ -60,9 +60,11 @@ app.use(express.json());
 const productsRouter = require('./ApiRoutes/products');
 const signUpRouter = require('./ApiRoutes/signUp');
 const signInRouter = require('./ApiRoutes/signIn');
+const productToCartRouter = require('./ApiRoutes/addProductToCart');
 const route = require('./ApiRoutes/route');
 
 app.use('/products', productsRouter);
+app.use('/productToCart', productToCartRouter);
 app.use('/signUp', signUpRouter);
 app.use('/signIn', signInRouter);
 app.use('/', route);

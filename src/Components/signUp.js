@@ -67,12 +67,15 @@ export default function SignUp() {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
+    const [resetPasswordMessage, setResetPasswordMessage] = useState()
     let history = useHistory();
     let location = useLocation();
     const [signUp, setSignUp] = useState(location.state)
 
     const handleAuthMethod = (e) => {
         setSignUp(e);
+        setError();
+        setResetPasswordMessage();
     }
 
     const handleSubmit = async (e) => {
@@ -104,6 +107,21 @@ export default function SignUp() {
         }
     }
 
+    const resetPassword = () => {
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                setResetPasswordMessage({
+                    message: 'Vous avez reçu un email pour réinitialiser votre mot de passe',
+                    style: 'success'
+                });
+            }).catch((err) => {
+                setResetPasswordMessage({
+                    message: 'Veuillez renseigner un email',
+                    style: 'error'
+                });
+            });
+    }
+
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -116,6 +134,7 @@ export default function SignUp() {
                 </Typography>
                 <form className={classes.form} onSubmit={handleSubmit}>
                     {error && <Alert severity="error">{error}</Alert>}
+                    {resetPasswordMessage && <Alert severity={resetPasswordMessage.style}>{resetPasswordMessage.message}</Alert>}
                     {signUp && <TextField
                         variant="outlined"
                         margin="normal"
@@ -155,7 +174,7 @@ export default function SignUp() {
                     {!signUp &&
                         <FormControlLabel
                             control={<Checkbox value="remember" color="primary" />}
-                            label="Remember me"
+                            label="Se souvenir de moi"
                         />
                     }
                     <Button
@@ -178,7 +197,7 @@ export default function SignUp() {
                         </Grid> :
                         <Grid container>
                             <Grid item xs>
-                                <Link href="#" variant="body2">
+                                <Link href="#" variant="body2" onClick={resetPassword}>
                                     Mot de passe oublié ?
                                 </Link>
                             </Grid>

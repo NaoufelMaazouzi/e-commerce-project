@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth } from '../firebase';
+import { auth, firebase } from '../firebase';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
@@ -13,11 +13,19 @@ import Menu from '@material-ui/core/Menu';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import { useHistory } from "react-router-dom";
 import { Link } from 'react-router-dom';
+import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
+import { connect } from 'react-redux';
+import { fetchProducts } from '../redux/products/productsActions';
+import Card from "@material-ui/core/Card";
+import CardActionArea from "@material-ui/core/CardActionArea";
+import CardContent from "@material-ui/core/CardContent";
+import CardMedia from "@material-ui/core/CardMedia";
+import Grid from "@material-ui/core/Grid";
+import DeleteIcon from '@material-ui/icons/Delete';
+import Axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -63,6 +71,10 @@ const useStyles = makeStyles((theme) => ({
         color: '#FFF',
         textDecoration: 'none'
     },
+    linkRouterMobile: {
+        color: '#000000',
+        textDecoration: 'none'
+    },
     inputRoot: {
         color: 'inherit',
     },
@@ -88,22 +100,56 @@ const useStyles = makeStyles((theme) => ({
             display: 'none',
         },
     },
+    root: {
+        maxWidth: 240,
+        minWidth: 230,
+        margin: theme.spacing(2),
+    },
+    media: {
+        height: 150,
+    },
 }));
 
-function SearchBar() {
+function SearchBar({ fetchProducts }) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
     const [userInfos, setUserInfos] = useState();
     let history = useHistory();
+    const [productsInCart, setProductsInCart] = useState([]);
+    const [array, setarray] = useState([]);
+
 
     useEffect(() => {
-        auth.onAuthStateChanged(function (user) {
+        auth.onAuthStateChanged(user => {
             if (user) {
                 setUserInfos(user)
             }
         });
+        const db = firebase.firestore();
+        async function fetchData() {
+            await db.collection('users').onSnapshot(snapshot => {
+                snapshot.forEach(doc => {
+                    setProductsInCart(doc.data().products);
+                })
+            })
+        }
+        fetchData();
+        const arrayy = productsInCart && productsInCart.length && productsInCart.map(e => {
+            return e.prix
+        })
+        setarray(arrayy);
     }, []);
+
+    const deleteFromCart = (product) => {
+        Axios.post('http://localhost:5000/productToCart/delete', { id: userInfos.uid, product })
+            .then(response => {
+                console.log('ok')
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+    }
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -148,8 +194,43 @@ function SearchBar() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+            {productsInCart && productsInCart.map(product =>
+                <Card className={classes.root}>
+                    <CardActionArea>
+                        <Grid container>
+                            <Grid item xs={6}>
+                                <CardMedia
+                                    component="img"
+                                    className={classes.media}
+                                    image={product.imgUrl}
+                                    title="Contemplative Reptile"
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <CardContent>
+                                    <Typography gutterBottom variant="h6" component="h2">
+                                        {product.prix}€
+                                    </Typography>
+                                    <Typography gutterBottom variant="subtitle2" component="h2">
+                                        {product.name}
+                                    </Typography>
+                                    <Typography gutterBottom variant="subtitle2" component="h2">
+                                        {product.couleur}
+                                    </Typography>
+                                    <IconButton aria-label="add to favorites" onClick={() => deleteFromCart(product)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </CardContent>
+
+                            </Grid>
+                        </Grid>
+                    </CardActionArea>
+                </Card>
+            )}
+            {productsInCart && productsInCart.length ?
+                <Link to="/panier" className={classes.linkRouterMobile} onClick={handleMenuClose}>
+                    <MenuItem>Voir mon panier</MenuItem>
+                </Link> : null}
         </Menu>
     );
 
@@ -164,34 +245,31 @@ function SearchBar() {
             open={isMobileMenuOpen}
             onClose={handleMobileMenuClose}
         >
-            <MenuItem>
-                <IconButton aria-label="show 4 new mails" color="inherit">
-                    <Badge badgeContent={4} color="secondary">
-                        <MailIcon />
-                    </Badge>
-                </IconButton>
-                <p>Messages</p>
-            </MenuItem>
-            <MenuItem>
-                <IconButton aria-label="show 11 new notifications" color="inherit">
-                    <Badge badgeContent={11} color="secondary">
-                        <NotificationsIcon />
-                    </Badge>
-                </IconButton>
-                <p>Notifications</p>
-            </MenuItem>
             <MenuItem onClick={handleProfileMenuOpen}>
-                <IconButton
-                    aria-label="account of current user"
-                    aria-controls="primary-search-account-menu"
-                    aria-haspopup="true"
-                    color="inherit"
-                >
-                    <AccountCircle />
+                <IconButton aria-label="show 4 new mails" color="inherit">
+                    <Badge badgeContent={userInfos && productsInCart && productsInCart.length} color="secondary" >
+                        <ShoppingBasketIcon />
+                    </Badge>
                 </IconButton>
-                <p>Profile</p>
+                <p>Mon panier</p>
             </MenuItem>
-        </Menu>
+            {userInfos &&
+                <Link to="/dashboard" className={classes.linkRouterMobile}>
+                    <MenuItem onClick={handleMobileMenuClose}>
+                        <IconButton
+                            aria-label="account of current user"
+                            aria-controls="primary-search-account-menu"
+                            aria-haspopup="true"
+                            color="inherit"
+                            onClick={handleMenuClose}
+                        >
+                            <AccountCircle />
+                        </IconButton>
+                        <p>Mon compte</p>
+                    </MenuItem>
+                </Link>
+            }
+        </Menu >
     );
 
     return (
@@ -226,27 +304,22 @@ function SearchBar() {
                     </div>
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
-                        <IconButton aria-label="show 4 new mails" color="inherit">
-                            <Badge badgeContent={4} color="secondary">
-                                <MailIcon />
-                            </Badge>
-                        </IconButton>
-                        <IconButton aria-label="show 17 new notifications" color="inherit">
-                            <Badge badgeContent={17} color="secondary">
-                                <NotificationsIcon />
+                        <IconButton aria-label="show 4 new mails" color="inherit" onClick={handleProfileMenuOpen}>
+                            <Badge badgeContent={userInfos && productsInCart && productsInCart.length} color="secondary" >
+                                <ShoppingBasketIcon />
                             </Badge>
                         </IconButton>
                         {userInfos &&
-                            <IconButton
-                                edge="end"
-                                aria-label="account of current user"
-                                aria-controls={menuId}
-                                aria-haspopup="true"
-                                onClick={handleProfileMenuOpen}
-                                color="inherit"
-                            >
-                                <AccountCircle />
-                            </IconButton>
+                            <Link to="/dashboard" className={classes.linkRouter}>
+                                <IconButton
+                                    aria-label="account of current user"
+                                    aria-controls="primary-search-account-menu"
+                                    aria-haspopup="true"
+                                    color="inherit"
+                                >
+                                    <AccountCircle />
+                                </IconButton>
+                            </Link>
                         }
                     </div>
                     {userInfos ?
@@ -278,4 +351,17 @@ function SearchBar() {
     );
 }
 
-export default SearchBar;
+const mapStateToProps = (state) => {
+    return {
+        products: state.products,
+    }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        fetchProducts: () => dispatch(fetchProducts())
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(SearchBar);

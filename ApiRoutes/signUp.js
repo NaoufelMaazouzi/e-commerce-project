@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const admin = require('firebase-admin');
+const db = admin.firestore();
 
 router.route('/').post(async (req, res) => {
     admin.auth().createUser({
@@ -11,9 +12,15 @@ router.route('/').post(async (req, res) => {
     })
         .then((user) => {
             console.log('User created', user.uid)
-            admin.auth().createCustomToken(user.uid)
-                .then(token => {
-                    return res.status(200).json(token)
+            db.collection('users').doc(user.uid).set({
+                name: user.displayName,
+                email: user.email
+            })
+                .then(() => {
+                    admin.auth().createCustomToken(user.uid)
+                        .then(token => {
+                            return res.status(200).json(token)
+                        })
                 })
         })
         .catch((error) => {

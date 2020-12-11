@@ -1,7 +1,9 @@
 import { makeStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
 import { useState, useEffect } from 'react';
+import { auth } from '../firebase';
 import axios from 'axios';
+import Alert from '@material-ui/lab/Alert';
 import {
     Box,
     CircularProgress,
@@ -53,11 +55,14 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ProductsComponent() {
-    const [product, setProduct] = useState([])
-    const [size, setSize] = useState([])
+    const classes = useStyles();
+    const [product, setProduct] = useState([]);
+    const [size, setSize] = useState([]);
+    const [userInfos, setUserInfos] = useState();
+    const [error, setError] = useState('');
     let params = useParams();
 
-    const handleChange = (event) => {
+    const handleChangeSize = (event) => {
         setSize(event.target.value);
     };
 
@@ -69,8 +74,26 @@ function ProductsComponent() {
             .catch((err) => {
                 console.log(err);
             })
+        auth.onAuthStateChanged(user => {
+            setUserInfos(user)
+        });
     }, [])
-    const classes = useStyles();
+
+    const addToCart = (product, size) => {
+        if (!userInfos) {
+            return setError('Vous devez vous connecter pour ajouter au panier');
+        }
+        else if (!size.length) {
+            return setError('Veuillez choisir une taille');
+        }
+        axios.post('http://localhost:5000/productToCart/add', { id: userInfos.uid, product, size })
+            .then(() => {
+                setError()
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+    }
 
     return (
         <div className={classes.container}>
@@ -96,6 +119,9 @@ function ProductsComponent() {
 
                 <div>
                     <Grid container spacing={3} justify="center">
+                        <Grid item xs={12}>
+                            {error && <Alert severity="error">{error}</Alert>}
+                        </Grid>
                         <Grid item xs={4} sm={12} xl={4} md={12} lg={4} >
                             <Card className={classes.imgContainer}>
                                 <CardActionArea>
@@ -129,7 +155,7 @@ function ProductsComponent() {
                                             labelId="demo-simple-select-placeholder-label-label"
                                             id="demo-simple-select-placeholder-label"
                                             value={size}
-                                            onChange={handleChange}
+                                            onChange={handleChangeSize}
                                             displayEmpty
                                             className={classes.selectEmpty}
                                         >
@@ -147,7 +173,7 @@ function ProductsComponent() {
                                         </Select>
                                     </FormControl>
                                     <Typography className={classes.button}>
-                                        <Button variant="contained" color="primary">
+                                        <Button variant="contained" color="primary" onClick={() => addToCart(product, size)}>
                                             Ajouter au panier
                                     </Button>
                                     </Typography>

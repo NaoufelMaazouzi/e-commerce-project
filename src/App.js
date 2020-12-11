@@ -4,6 +4,7 @@ import SearchBar from './Components/searchBar';
 import SignUp from './Components/signUp';
 import PublicRoute from './ReactRouterRoutes/publicRoute';
 import Dashboard from './Components/dashboard';
+import Cart from './Components/cart';
 
 
 import {
@@ -22,6 +23,7 @@ function App() {
           <PublicRoute path="/product/:id" component={ProductDetails} />
           <PublicRoute path="/signUp" component={SignUp} />
           <PublicRoute path="/dashboard" component={Dashboard} />
+          <PublicRoute path="/panier" component={Cart} />
         </Switch>
       </div>
     </Router >
