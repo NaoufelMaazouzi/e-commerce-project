@@ -67,7 +67,7 @@ app.use('/products', productsRouter);
 app.use('/productToCart', productToCartRouter);
 app.use('/signUp', signUpRouter);
 app.use('/signIn', signInRouter);
-app.use('/', route);
+// app.use('/', route);
 
 // FOR PRODUCTION
 if (process.env.NODE_ENV === 'production') {
