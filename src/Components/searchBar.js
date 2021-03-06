@@ -142,7 +142,7 @@ function SearchBar({ fetchProducts }) {
     }, []);
 
     const deleteFromCart = (product) => {
-        Axios.post('http://localhost:5000/productToCart/delete', { id: userInfos.uid, product })
+        Axios.post('/productToCart/delete', { id: userInfos.uid, product })
             .then(response => {
                 console.log('ok')
             })

@@ -67,7 +67,7 @@ function ProductsComponent() {
     };
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/products/${params.id}`)
+        axios.get(`/products/${params.id}`)
             .then(response => {
                 setProduct(response.data);
             })
@@ -86,7 +86,7 @@ function ProductsComponent() {
         else if (!size.length) {
             return setError('Veuillez choisir une taille');
         }
-        axios.post('http://localhost:5000/productToCart/add', { id: userInfos.uid, product, size })
+        axios.post('/productToCart/add', { id: userInfos.uid, product, size })
             .then(() => {
                 setError()
             })

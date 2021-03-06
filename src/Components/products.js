@@ -65,7 +65,7 @@ function ProductsComponent({ productsFetched, fetchProducts }) {
         else if (!size.length) {
             return setError('Veuillez choisir une taille');
         }
-        axios.post('http://localhost:5000/productToCart/add', { id: userInfos.uid, product, size })
+        axios.post('/productToCart/add', { id: userInfos.uid, product, size })
             .then(() => {
                 setError()
             })
