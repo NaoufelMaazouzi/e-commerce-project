@@ -17,7 +17,7 @@ const fetchProductsFail = (error) => {
 
 export const fetchProducts = () => {
     return (dispatch) => {
-        Axios.get('http://localhost:5000/products/')
+        Axios.get('/products')
             .then(response => {
                 const products = response.data;
                 dispatch(fetchProductsSuccess(products));
