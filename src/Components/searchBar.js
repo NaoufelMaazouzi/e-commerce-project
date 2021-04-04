@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
-import { auth, firebase } from '../firebase';
+import { auth } from '../firebase';
 import { fade, makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import InputBase from '@material-ui/core/InputBase';
-import Badge from '@material-ui/core/Badge';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
+import {
+    AppBar,
+    Button,
+    Toolbar,
+    IconButton,
+    Typography,
+    InputBase,
+    Badge,
+    MenuItem,
+    Menu,
+    Card,
+    CardContent,
+    CardMedia,
+    Grid,
+} from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
@@ -18,14 +24,11 @@ import { useHistory } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import { connect } from 'react-redux';
-import { fetchProducts } from '../redux/products/productsActions';
-import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
-import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
-import Grid from "@material-ui/core/Grid";
 import DeleteIcon from '@material-ui/icons/Delete';
 import Axios from 'axios';
+import apiRest from '../apiKey';
+import { fetchProductsInCart } from '../redux/productsInCart/productsInCartActions';
+import { fetchUserInfos, removeUserInfos } from '../redux/userInfos/userInfosActions';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -108,41 +111,29 @@ const useStyles = makeStyles((theme) => ({
     media: {
         height: 150,
     },
+    panierButton: {
+        display: 'flex',
+        justifyContent: 'center'
+    }
 }));
 
-function SearchBar({ fetchProducts }) {
+function SearchBar({ productsInCartFetched, fetchProductsInCart, fetchUserInfos, removeUserInfos, userInfosFetched }) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-    const [userInfos, setUserInfos] = useState();
     let history = useHistory();
-    const [productsInCart, setProductsInCart] = useState([]);
     const [array, setarray] = useState([]);
 
-
     useEffect(() => {
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                setUserInfos(user)
-            }
-        });
-        const db = firebase.firestore();
-        async function fetchData() {
-            await db.collection('users').onSnapshot(snapshot => {
-                snapshot.forEach(doc => {
-                    setProductsInCart(doc.data().products);
-                })
-            })
-        }
-        fetchData();
-        const arrayy = productsInCart && productsInCart.length && productsInCart.map(e => {
+        fetchProductsInCart();
+        fetchUserInfos();
+        const arrayy = productsInCartFetched && productsInCartFetched.length && productsInCartFetched.map(e => {
             return e.prix
         })
         setarray(arrayy);
     }, []);
-
     const deleteFromCart = (product) => {
-        Axios.post('/productToCart/delete', { id: userInfos.uid, product })
+        Axios.post(`http://localhost:5000/api/productToCart/delete`, { id: userInfosFetched.uid, product })
             .then(response => {
                 console.log('ok')
             })
@@ -175,7 +166,7 @@ function SearchBar({ fetchProducts }) {
         auth.signOut()
             .then(() => {
                 console.log('user signed out')
-                setUserInfos();
+                removeUserInfos();
                 history.push("/");
             })
             .catch(err => {
@@ -194,9 +185,9 @@ function SearchBar({ fetchProducts }) {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            {productsInCart && productsInCart.map(product =>
-                <Card className={classes.root}>
-                    <CardActionArea>
+            {userInfosFetched && productsInCartFetched && productsInCartFetched.map((product, i) =>
+                <Card className={classes.root} key={i}>
+                    <CardContent>
                         <Grid container>
                             <Grid item xs={6}>
                                 <CardMedia
@@ -224,13 +215,18 @@ function SearchBar({ fetchProducts }) {
 
                             </Grid>
                         </Grid>
-                    </CardActionArea>
+                    </CardContent>
                 </Card>
             )}
-            {productsInCart && productsInCart.length ?
+            {userInfosFetched && productsInCartFetched && productsInCartFetched.length ?
                 <Link to="/panier" className={classes.linkRouterMobile} onClick={handleMenuClose}>
-                    <MenuItem>Voir mon panier</MenuItem>
-                </Link> : null}
+                    <div className={classes.panierButton}>
+                        <Button variant="contained" color="primary">Voir panier</Button>
+                    </div>
+                </Link> : 
+                <Link to="/signUp" className={classes.linkRouterMobile} onClick={handleMenuClose}>
+                <MenuItem>Se connecter pour voir mon panier</MenuItem>
+            </Link>}
         </Menu>
     );
 
@@ -247,13 +243,13 @@ function SearchBar({ fetchProducts }) {
         >
             <MenuItem onClick={handleProfileMenuOpen}>
                 <IconButton aria-label="show 4 new mails" color="inherit">
-                    <Badge badgeContent={userInfos && productsInCart && productsInCart.length} color="secondary" >
+                    <Badge badgeContent={userInfosFetched && productsInCartFetched && productsInCartFetched.length} color="secondary" >
                         <ShoppingBasketIcon />
                     </Badge>
                 </IconButton>
                 <p>Mon panier</p>
             </MenuItem>
-            {userInfos &&
+            {userInfosFetched &&
                 <Link to="/dashboard" className={classes.linkRouterMobile}>
                     <MenuItem onClick={handleMobileMenuClose}>
                         <IconButton
@@ -305,11 +301,11 @@ function SearchBar({ fetchProducts }) {
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
                         <IconButton aria-label="show 4 new mails" color="inherit" onClick={handleProfileMenuOpen}>
-                            <Badge badgeContent={userInfos && productsInCart && productsInCart.length} color="secondary" >
+                            <Badge badgeContent={userInfosFetched && productsInCartFetched && productsInCartFetched.length} color="secondary" >
                                 <ShoppingBasketIcon />
                             </Badge>
                         </IconButton>
-                        {userInfos &&
+                        {userInfosFetched &&
                             <Link to="/dashboard" className={classes.linkRouter}>
                                 <IconButton
                                     aria-label="account of current user"
@@ -322,14 +318,14 @@ function SearchBar({ fetchProducts }) {
                             </Link>
                         }
                     </div>
-                    {userInfos ?
+                    {userInfosFetched ?
                         <Button onClick={handleSignOut} variant="contained" color="primary" disableElevation className={classes.deconnexion}>
                             Deconnexion
                         </Button> :
                         <Link to="/signUp" className={classes.linkRouter}>
                             <Button variant="contained" color="primary" disableElevation>
                                 Connexion
-                    </Button>
+                            </Button>
                         </Link>
                     }
                     <div className={classes.sectionMobile}>
@@ -353,13 +349,16 @@ function SearchBar({ fetchProducts }) {
 
 const mapStateToProps = (state) => {
     return {
-        products: state.products,
+        productsInCartFetched: state.productsInCart.productsInCartFetched,
+        userInfosFetched: state.userInfos.userInfosFetched,
     }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        fetchProducts: () => dispatch(fetchProducts())
+        fetchProductsInCart: () => dispatch(fetchProductsInCart()),
+        fetchUserInfos: () => dispatch(fetchUserInfos()),
+        removeUserInfos: () => dispatch(removeUserInfos())
     }
 }
 

@@ -10,7 +10,6 @@ import {
     CardContent,
     Typography,
     CardMedia,
-    CardActionArea,
     Card,
     InputLabel,
     MenuItem,
@@ -50,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
     },
     cardContent: {
         marginTop: '5%'
+    },
+    container: {
+        width: '99%'
     }
 }));
 
@@ -67,7 +69,7 @@ function ProductsComponent() {
     };
 
     useEffect(() => {
-        axios.get(`/products/${params.id}`)
+        axios.get(`http://localhost:5000/api/products/${params.id}`)
             .then(response => {
                 setProduct(response.data);
             })
@@ -86,7 +88,7 @@ function ProductsComponent() {
         else if (!size.length) {
             return setError('Veuillez choisir une taille');
         }
-        axios.post('/productToCart/add', { id: userInfos.uid, product, size })
+        axios.post(`http://localhost:5000/api/productToCart/add`, { id: userInfos.uid, product, size })
             .then(() => {
                 setError()
             })
@@ -98,25 +100,6 @@ function ProductsComponent() {
     return (
         <div className={classes.container}>
             {product.length !== 0 ?
-                // <Grid container justify="center" alignItems="center">
-                //     <Grid item="true" xs={3}>
-                //         <Card className={classes.root}>
-                //             <CardActionArea>
-                //                 <CardMedia
-                //                     className={classes.media}
-                //                     image={product.imgUrl}
-                //                     title="Contemplative Reptile"
-                //                 />
-                //             </CardActionArea>
-                //         </Card>
-                //     </Grid>
-                //     <Grid item="true" xs={3} >
-                //         <Paper>
-                //             Hello
-                //         </Paper>
-                //     </Grid>
-                // </Grid>
-
                 <div>
                     <Grid container spacing={3} justify="center">
                         <Grid item xs={12}>
@@ -124,13 +107,12 @@ function ProductsComponent() {
                         </Grid>
                         <Grid item xs={4} sm={12} xl={4} md={12} lg={4} >
                             <Card className={classes.imgContainer}>
-                                <CardActionArea>
+                                <CardContent>
                                     <CardMedia
                                         className={classes.media}
                                         image={product.imgUrl}
-                                        title="Contemplative Reptile"
                                     />
-                                </CardActionArea>
+                                </CardContent>
                             </Card>
                         </Grid>
                         <Grid item xs={12} lg={5} sm={12} xl={4} md={12}>

@@ -1,4 +1,4 @@
-import { FETCH_PRODUCTS_SUCCES, FETCH_PRODUCTS_FAIL } from './types';
+import { FETCH_PRODUCTS_SUCCES, FETCH_PRODUCTS_FAIL } from '../types';
 import Axios from 'axios';
 
 export const fetchProductsSuccess = (products) => {
@@ -17,7 +17,7 @@ const fetchProductsFail = (error) => {
 
 export const fetchProducts = () => {
     return (dispatch) => {
-        Axios.get('/products')
+        Axios.get(`http://localhost:5000/api/products`)
             .then(response => {
                 const products = response.data;
                 dispatch(fetchProductsSuccess(products));

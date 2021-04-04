@@ -14,7 +14,6 @@ import {
     CardContent,
     Typography,
     CardMedia,
-    CardActionArea,
     Card,
     InputLabel,
     MenuItem,
@@ -65,7 +64,7 @@ function ProductsComponent({ productsFetched, fetchProducts }) {
         else if (!size.length) {
             return setError('Veuillez choisir une taille');
         }
-        axios.post('/productToCart/add', { id: userInfos.uid, product, size })
+        axios.post('http://localhost:5000/api/productToCart/add', { id: userInfos.uid, product, size })
             .then(() => {
                 setError()
             })
@@ -88,13 +87,12 @@ function ProductsComponent({ productsFetched, fetchProducts }) {
                     {productsFetched.map(product =>
                         <Grid item key={product.name} >
                             <Card className={classes.root}>
-                                <CardActionArea>
+                                <CardContent>
                                     <Link to={`/product/${product.id}`} style={{ textDecoration: 'none' }} key={product.name}>
                                         <CardMedia
                                             component="img"
                                             className={classes.media}
                                             image={product.imgUrl}
-                                            title="Contemplative Reptile"
                                         />
                                     </Link>
 
@@ -136,7 +134,7 @@ function ProductsComponent({ productsFetched, fetchProducts }) {
                                             <AddShoppingCartIcon />
                                         </IconButton>
                                     </CardActions>
-                                </CardActionArea>
+                                </CardContent>
                             </Card>
                         </Grid>
 

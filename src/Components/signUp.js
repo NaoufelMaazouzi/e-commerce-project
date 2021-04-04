@@ -81,7 +81,7 @@ export default function SignUp() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (signUp) {
-            await Axios.post('/signUp', { name, email, password })
+            await Axios.post(`http://localhost:5000/api/signUp`, { name, email, password })
                 .then((e) => {
                     const token = e.data;
                     auth.signInWithCustomToken(token)

@@ -1,4 +1,4 @@
-import { FETCH_PRODUCTS_SUCCES, FETCH_PRODUCTS_FAIL } from './types';
+import { FETCH_PRODUCTS_SUCCES, FETCH_PRODUCTS_FAIL } from '../types';
 
 
 const initialeState = () => {
