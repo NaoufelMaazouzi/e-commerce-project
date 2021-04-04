@@ -33,13 +33,11 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "dev": "react-scripts start && nodemon server.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "build": "react-scripts build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "test": "echo \"Error: no test specified\" && exit 1" ,
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
