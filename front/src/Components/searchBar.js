@@ -133,7 +133,7 @@ function SearchBar({ productsInCartFetched, fetchProductsInCart, fetchUserInfos,
         setarray(arrayy);
     }, []);
     const deleteFromCart = (product) => {
-        Axios.post(`http://localhost:5000/api/productToCart/delete`, { id: userInfosFetched.uid, product })
+        Axios.post(`/api/productToCart/delete`, { id: userInfosFetched.uid, product })
             .then(response => {
                 console.log('ok')
             })
